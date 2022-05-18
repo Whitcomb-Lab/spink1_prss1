@@ -1,0 +1,71 @@
+---
+title: "spink1-prss1"
+author: "Dongni Fu, Brandon M Blobner & Phil J Greer"
+date: '2022-05-11'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(plyr)
+library(DescTools)
+library(Publish)
+library(gdata)
+library(knitr)
+
+options(scipen=1, digits=2)
+```
+
+## Data Import 
+
+Reading in the combined pheotype and genotype (SPINK1 & PRSS1) data for all NAPS2 subjects.
+
+Each genotype line is marked as counts of the minor allele in the column name. 0 = homozygous reference, 1 = heterozygous, 2 = homozygous minor allele.
+
+```{r red_and_recode_data}
+
+naps2_spink1_prss1 <- read.table("naps2_spink1_prss1.txt", header = TRUE)
+
+```
+
+
+## Demographic Table  Table 1
+
+Build univariate demographics table.
+
+
+```{r demo_tables }
+
+
+## NAPS2 only
+
+publish(univariateTable(phenotype ~ age + sex_cat + bmi_current + factor(diagnosis) + factor(rs17107315_C) +  factor(rs10273639_T)  , 
+                        data=naps2_spink1_prss1,  compare.groups=TRUE,digits.summary=5 ),pvalue.digits = 10)
+
+```
+
+
+## Tables and fisher's test
+Main table is pancreatitis vs control
+Fishers exact test onresults of this table
+
+Extra table printed for RAP, CP breakdown
+```{r table4, echo=TRUE}
+
+naps2_panc_con.tbl4 <- (addmargins(table(naps2_spink1_prss1$rs17107315_C , naps2_spink1_prss1$rs10273639_T, naps2_spink1_prss1$phenotype)))
+
+naps2_panc_con.tbl4
+
+fisher.test( matrix(c(9, 199, 4, 183), ncol = 2) )
+fisher.test( matrix(c(46, 633, 14, 390), ncol = 2) )
+fisher.test( matrix(c(32, 532, 6, 268), ncol = 2) )
+
+
+
+naps2_cp_rap_con.tbl4 <- (addmargins(table(naps2_spink1_prss1$rs17107315_C , naps2_spink1_prss1$rs10273639_T, naps2_spink1_prss1$diagnosis)))
+
+naps2_cp_rap_con.tbl4
+
+```
+
